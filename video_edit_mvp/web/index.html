@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video Edit MVP</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <h1>Video Edit MVP</h1>
+          <p id="heroCopy">Corta silêncio no começo e no fim dos takes, junta tudo e exporta um vídeo final sem mexer nos arquivos originais.</p>
+        </div>
+        <div class="status" id="statusBox">
+          <span id="statusDot"></span>
+          <strong id="statusText">Pronto</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="sidebar">
+          <div class="brand">
+            <span>VE</span>
+            <div>
+              <strong>Video Edit</strong>
+              <small>MVP local</small>
+            </div>
+          </div>
+          <div class="modeTabs" aria-label="Modo de trabalho">
+            <button class="modeTab active" type="button" data-mode="merge">Cortar + juntar</button>
+            <button class="modeTab" type="button" data-mode="caption">Só legendar</button>
+            <button class="modeTab" type="button" data-mode="creative">Criativos Meta Ads</button>
+          </div>
+          <div class="sideNote" id="modeNote">Motor rápido para limpar takes e montar um vídeo único.</div>
+        </aside>
+
+        <div class="panel controls">
+          <div class="panelHeader">
+            <strong>Configuração</strong>
+            <span>Pastas, edição e legenda</span>
+          </div>
+
+          <label class="creativeOnly hidden">
+            Pasta dos áudios
+            <span class="pathField">
+              <input id="creativeAudioFolder" spellcheck="false" />
+              <button class="pathPicker" type="button" data-path-target="creativeAudioFolder" title="Selecionar pasta">...</button>
+            </span>
+          </label>
+
+          <label id="inputFolderLabel">
+            <span id="inputFolderText">Pasta dos takes</span>
+            <span class="pathField">
+              <input id="inputFolder" spellcheck="false" />
+              <button class="pathPicker" type="button" data-path-target="inputFolder" title="Selecionar pasta">...</button>
+            </span>
+          </label>
+          <label>
+            Pasta de saída
+            <span class="pathField">
+              <input id="outputFolder" spellcheck="false" />
+              <button class="pathPicker" type="button" data-path-target="outputFolder" title="Selecionar pasta">...</button>
+            </span>
+          </label>
+
+          <div class="buttons actionDock">
+            <button id="analyzeBtn" class="secondary">Analisar takes</button>
+            <button id="creativeTranscribeBtn" class="secondary hidden">Transcrever 1º áudio</button>
+            <button id="creativeTestBtn" class="secondary hidden">Gerar teste</button>
+            <button id="processBtn">Gerar vídeo final</button>
+          </div>
+
+          <div class="creativeOnly hidden">
+            <label>
+              B-roll do produto
+              <span class="pathField">
+                <input id="creativeBrollPath" spellcheck="false" />
+                <button class="pathPicker" type="button" data-path-target="creativeBrollPath" title="Selecionar pasta">...</button>
+              </span>
+            </label>
+            <label>
+              Palavras-chave do B-roll
+              <input id="creativeKeywords" placeholder="dinâmica, dinamica, dinâmicas" spellcheck="false" />
+            </label>
+            <label>
+              Duração de cada take
+              <input id="creativeSegmentDuration" type="number" min="1" max="8" step="0.25" />
+            </label>
+            <div class="grid">
+              <label>
+                Velocidade dos takes
+                <span class="speedField">
+                  <select id="creativeBackgroundSpeedPreset">
+                    <option value="1">1.00x</option>
+                    <option value="1.1">1.10x</option>
+                    <option value="1.15">1.15x</option>
+                    <option value="1.2">1.20x</option>
+                    <option value="1.25">1.25x</option>
+                  </select>
+                  <input id="creativeBackgroundSpeedCustom" type="number" min="0.25" max="3" step="0.01" placeholder="custom" />
+                </span>
+              </label>
+              <label class="check topCheck">
+                <input id="creativeSpeedBroll" type="checkbox" />
+                Acelerar B-roll também
+              </label>
+            </div>
+          </div>
+
+          <div class="creativeOnly hidden optionBand">
+            <div class="sectionTitle">
+              <strong>Áudio da copy</strong>
+              <span>Corte inspirado no auto-editor</span>
+            </div>
+            <label class="check">
+              <input id="creativeTrimAudioEdges" type="checkbox" />
+              Remover silêncio do início e do fim
+            </label>
+            <label class="check">
+              <input id="creativeCutInternalSilence" type="checkbox" />
+              Encurtar silêncios longos entre frases
+            </label>
+            <div class="grid">
+              <label>
+                Sensibilidade
+                <input id="creativeSilenceThresholdDb" type="number" min="-60" max="-15" step="1" />
+              </label>
+              <label>
+                Silêncio mínimo
+                <input id="creativeMinSilenceDuration" type="number" min="0.1" max="2" step="0.05" />
+              </label>
+              <label>
+                Margem entre frases
+                <input id="creativeKeepSilence" type="number" min="0" max="1" step="0.02" />
+              </label>
+            </div>
+          </div>
+
+          <label class="mergeOnly">
+            Método de corte
+            <select id="detectionMode">
+              <option value="speech">Fala (Whisper/VAD)</option>
+              <option value="volume">Volume/silêncio</option>
+            </select>
+          </label>
+
+          <div class="grid mergeOnly">
+            <label>
+              Sensibilidade
+              <input id="thresholdDb" type="number" min="-60" max="-15" step="1" />
+            </label>
+            <label>
+              Silêncio mínimo
+              <input id="silenceDuration" type="number" min="0.05" max="1" step="0.05" />
+            </label>
+            <label>
+              Margem inicial
+              <input id="startPadding" type="number" min="0" max="1" step="0.05" />
+            </label>
+            <label>
+              Margem final
+              <input id="endPadding" type="number" min="0" max="1" step="0.05" />
+            </label>
+          </div>
+
+          <div class="subtitles">
+            <label>
+              Legenda
+              <select id="subtitleMode">
+                <option value="none">Sem legenda</option>
+                <option value="normal">Legenda normal</option>
+                <option value="highlight">Destaque por palavra</option>
+              </select>
+            </label>
+
+            <div class="captionPreview" aria-label="Prévia da posição da legenda">
+              <div class="previewGrid"></div>
+              <div class="previewPerson"></div>
+              <div id="previewCaption" class="previewCaption">
+                <span class="previewWord">LEGENDA</span> <span>AQUI</span> <span>AGORA</span>
+                <span class="captionSizeHandle" aria-hidden="true"></span>
+              </div>
+            </div>
+
+            <label>
+              Posição horizontal
+              <input id="subtitleXPosition" type="range" min="0.05" max="0.95" step="0.01" />
+            </label>
+            <label>
+              Posição vertical
+              <input id="subtitleYPosition" type="range" min="0.05" max="0.95" step="0.01" />
+            </label>
+
+            <div class="grid">
+              <label>
+                Tamanho
+                <input id="subtitleFontSize" type="number" min="12" max="56" step="1" />
+              </label>
+              <label>
+                Palavras por linha
+                <input id="subtitleWordsPerLine" type="number" min="1" max="6" step="1" />
+              </label>
+            </div>
+
+            <label class="check">
+              <input id="subtitleForceCaps" type="checkbox" />
+              Maiúsculas
+            </label>
+          </div>
+
+          <div class="progress">
+            <div id="bar"></div>
+          </div>
+        </div>
+
+        <div class="panel report">
+          <div class="numbers">
+            <div>
+              <span id="metricOneLabel">Originais</span>
+              <strong id="originalDuration">--</strong>
+            </div>
+            <div>
+              <span id="metricTwoLabel">Final estimado</span>
+              <strong id="finalDuration">--</strong>
+            </div>
+            <div>
+              <span id="metricThreeLabel">Cortado</span>
+              <strong id="removedDuration">--</strong>
+            </div>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th id="thOne">Take</th>
+                  <th id="thTwo">Início</th>
+                  <th id="thThree">Fim</th>
+                  <th id="thFour">Usa</th>
+                  <th id="thFive">Corta</th>
+                  <th id="thSix">Método</th>
+                </tr>
+              </thead>
+              <tbody id="clipsBody">
+                <tr><td colspan="6">Clique em analisar para ver os cortes.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="result" class="result hidden"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

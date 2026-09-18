@@ -1,0 +1,32 @@
+.headline-studio-view { min-height: calc(100vh - 90px); }
+.native-headline-workspace { display: grid; grid-template-columns: 230px minmax(420px, 1fr) minmax(290px, .62fr); gap: 18px; align-items: start; }
+.headline-copy-catalog, .native-headline-editor, .native-headline-preview { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.headline-copy-catalog { overflow: hidden; }
+.headline-catalog-heading, .native-headline-editor-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line); padding: 16px; }
+.headline-catalog-heading h2, .native-headline-editor-heading h2 { margin: 4px 0 0; font-size: 15px; }
+.headline-catalog-heading strong { color: var(--acid); font: 800 12px var(--mono); }
+.headline-copy-list { display: grid; gap: 6px; max-height: calc(100vh - 210px); overflow: auto; padding: 10px; }
+.headline-copy-item { display: grid; gap: 5px; width: 100%; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); padding: 11px; text-align: left; font-size: 10px; }
+.headline-copy-item:hover { background: #1c211a; }
+.headline-copy-item.active { border-color: #6c9129; background: #1b2415; color: #d5e4bf; }
+.headline-copy-title { color: var(--text); font-size: 12px; font-weight: 800; }
+.headline-copy-item i { color: var(--acid); font: 800 9px var(--mono); font-style: normal; }
+.native-headline-editor-heading { align-items: flex-start; }
+.native-headline-editor-heading p { color: var(--muted); font-size: 11px; margin: 4px 0 0; }
+.native-headline-actions { display: flex; align-items: center; gap: 8px; }
+.native-headline-actions .secondary-button { min-height: 33px; }
+.native-headline-form { display: grid; gap: 16px; padding: 17px; }
+.native-headline-text { display: grid; gap: 7px; }
+.native-headline-text textarea { min-height: 118px; resize: vertical; }
+.native-headline-savebar { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid var(--line); padding: 14px 17px; color: var(--muted); font-size: 10px; }
+.native-headline-preview { position: sticky; top: 20px; display: grid; gap: 12px; padding: 16px; }
+.native-headline-preview h2 { margin: 4px 0 5px; font-size: 16px; }
+.native-headline-preview p { color: var(--muted); font-size: 10px; line-height: 1.5; margin: 0; }
+.native-headline-stage { position: relative; width: min(100%, 350px); justify-self: center; aspect-ratio: 9 / 16; overflow: hidden; border: 1px solid #4b554a; border-radius: 5px; background: #27372c; }
+.native-headline-scene { position: absolute; inset: 0; background: linear-gradient(160deg, #c19a6f 0 34%, #728c7b 34% 66%, #183426 66%); }
+.native-headline-stage::after { content: ""; position: absolute; z-index: 1; inset: 12.5% 0; border-top: 1px solid rgba(255,255,255,.7); border-bottom: 1px solid rgba(255,255,255,.7); background: rgba(255,255,255,.18); pointer-events: none; }
+.native-headline-stage img { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.native-headline-preview-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.native-headline-preview-values span { border: 1px solid var(--line); border-radius: 5px; color: var(--muted); padding: 8px 4px; text-align: center; font: 700 9px var(--mono); }
+@media (max-width: 1220px) { .native-headline-workspace { grid-template-columns: 210px minmax(390px, 1fr); } .native-headline-preview { grid-column: 1 / -1; grid-template-columns: 1fr minmax(200px, 300px) 1fr; align-items: center; } .native-headline-preview > :first-child { grid-column: 1; } .native-headline-stage { grid-column: 2; grid-row: 1 / span 2; } .native-headline-preview-values { grid-column: 3; } }
+@media (max-width: 760px) { .native-headline-workspace { grid-template-columns: 1fr; } .headline-copy-list { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 230px; } .native-headline-preview { position: static; grid-template-columns: 1fr; } .native-headline-preview > :first-child, .native-headline-stage, .native-headline-preview-values { grid-column: auto; grid-row: auto; } .native-headline-stage { width: min(100%, 310px); } .native-headline-savebar { align-items: flex-start; flex-direction: column; } }

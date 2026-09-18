@@ -1,0 +1,3 @@
+.react-flow__node { pointer-events: all !important; z-index: 5; }
+.react-flow__node .nodrag,
+.react-flow__node .nopan { pointer-events: all !important; }

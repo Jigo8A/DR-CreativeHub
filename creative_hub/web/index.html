@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10110f">
+  <title>Creative Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/headline_workspace.css">
+    <link rel="stylesheet" href="/headline_preview_interaction.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark"><i data-lucide="clapperboard"></i></span>
+        <div><strong>Creative Hub</strong><small>Meta Ads Studio</small></div>
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Recolher barra lateral" title="Recolher barra lateral"><i data-lucide="panel-left-close"></i></button>
+      </div>
+      <nav class="nav-list" aria-label="Navegacao principal">
+        <button class="nav-item active" data-view="creative" title="Criativos"><i data-lucide="layers-3"></i><span>Criativos</span></button>
+        <button class="nav-item" data-view="headline-studio" title="Headlines"><i data-lucide="network"></i><span>Headlines</span></button>
+        <button class="nav-item" data-view="offers" title="Ofertas"><i data-lucide="package-open"></i><span>Ofertas</span></button>
+        <button class="nav-item" data-view="edit" title="Edicao"><i data-lucide="sliders-horizontal"></i><span>Edicao</span></button>
+        <div class="nav-settings">
+          <button class="nav-item" id="settingsToggle" type="button" title="Configuracoes" aria-expanded="false"><i data-lucide="settings-2"></i><span>Configuracoes</span><i class="nav-chevron" data-lucide="chevron-down"></i></button>
+          <div class="settings-menu" id="settingsMenu">
+            <button class="nav-item nav-subitem" data-view="integrations" title="Integracoes e APIs"><i data-lucide="plug-zap"></i><span>Integracoes e APIs</span></button>
+            <button class="nav-item nav-subitem" data-view="performance" title="Desempenho"><i data-lucide="gauge"></i><span>Desempenho</span></button>
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="engine-dot"></span>
+        <div><small>Motor de video</small><strong id="engineStatus">Pronto</strong></div>
+      </div>
+    </aside>
+    <section class="app-main">
+      <header class="topbar">
+        <div><p class="section-kicker" id="sectionKicker">WORKSPACE</p><h1 id="pageTitle">Criativos</h1></div>
+        <div class="topbar-actions">
+          <span class="save-indicator" id="saveIndicator"><i data-lucide="check"></i>Salvo localmente</span>
+          <button class="icon-button" type="button" id="openOutputButton" aria-label="Abrir pasta de saida" title="Abrir pasta de saida"><i data-lucide="folder-open"></i></button>
+          <button class="primary-button" type="button" id="topAction"><i data-lucide="plus"></i>Nova copy</button>
+        </div>
+      </header>
+      <main class="workspace">
+        <section class="view active" id="creativeView" data-view="creative"></section>
+        <section class="view headline-studio-view" id="headlineStudioView" data-view="headline-studio"></section>
+        <section class="view" id="offersView" data-view="offers"></section>
+        <section class="view" id="editView" data-view="edit"></section>
+        <section class="view" id="integrationsView" data-view="integrations"></section>
+        <section class="view" id="performanceView" data-view="performance"></section>
+      </main>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="offerModal" hidden>
+    <section class="app-modal" role="dialog" aria-modal="true" aria-labelledby="offerModalTitle">
+      <div class="modal-heading"><div><p class="section-kicker" id="offerModalKicker">NOVA OFERTA</p><h2 id="offerModalTitle">Criar oferta</h2></div><button class="icon-button" id="offerModalClose" type="button" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+      <p class="modal-description" id="offerModalDescription"></p>
+      <label id="offerNameField"><span class="field-label">Nome da oferta</span><input class="text-field" id="offerNameInput" maxlength="80" placeholder="Ex.: 250 dinamicas para criancas" autocomplete="off"></label>
+      <div class="modal-actions"><button class="secondary-button" id="offerModalCancel" type="button">Cancelar</button><button class="primary-button" id="offerModalConfirm" type="button">Criar oferta</button></div>
+    </section>
+  </div>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/color_utils.js"></script>
+  <script src="/preview_metrics.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

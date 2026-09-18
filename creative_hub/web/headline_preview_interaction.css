@@ -1,0 +1,12 @@
+.native-headline-guides { inset: 0; pointer-events: none; position: absolute; z-index: 3; }
+.native-preview-guide { background: rgba(190, 255, 68, .92); display: none; position: absolute; }
+.native-preview-guide.visible { display: block; }
+.native-preview-guide.vertical { height: 100%; left: 50%; top: 0; width: 1px; }
+.native-preview-guide.horizontal { height: 1px; left: 0; top: 50%; width: 100%; }
+.native-headline-hitbox { border: 1px dashed rgba(190, 255, 68, .96); box-sizing: border-box; cursor: grab; min-height: 10px; min-width: 10px; position: absolute; touch-action: none; transform: translate(-50%, -50%); z-index: 4; }
+.native-headline-hitbox:active { cursor: grabbing; }
+.native-headline-hitbox.has-outline { box-shadow: 0 0 0 2px rgba(0, 0, 0, .78); }
+.native-headline-handle { background: var(--acid); border: 2px solid #17200b; border-radius: 50%; box-sizing: border-box; height: 12px; position: absolute; width: 12px; }
+.native-headline-handle.width { cursor: ew-resize; right: -7px; top: 50%; transform: translateY(-50%); }
+.native-headline-handle.height { bottom: -7px; cursor: ns-resize; left: 50%; transform: translateX(-50%); }
+.native-headline-handle.corner { bottom: -7px; cursor: nwse-resize; right: -7px; }

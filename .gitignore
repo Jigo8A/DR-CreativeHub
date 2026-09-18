@@ -1,0 +1,33 @@
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.superpowers/
+
+# Node dependencies and logs
+**/node_modules/
+*.log
+
+# Local Creative Hub state and secrets
+creative_hub/data/*
+!creative_hub/data/.gitkeep
+creative_hub/data/state.json
+
+# Generated media, renders, temporary jobs and previews
+*.mp4
+*.m4a
+*.mp3
+*.wav
+*.ass
+*.png
+creative_hub/.emoji-preview-cache/
+creative_hub/data/emoji_headline_cache/
+creative_hub/.emoji-*
+creative_hub/emoji-render-check.*
+creative_hub/chrome-test.*
+video_edit_mvp/output/
+video_edit_mvp/temp/
+
+# Local operating-system files
+Thumbs.db
+Desktop.ini
