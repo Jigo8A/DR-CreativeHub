@@ -8,6 +8,76 @@ from voice_provider import HttpResponse
 
 
 class AssemblyAISpeechDetectorTests(unittest.TestCase):
+    def test_uses_sync_api_for_short_audio_and_returns_timed_words(self) -> None:
+        with TemporaryDirectory() as temporary:
+            audio = Path(temporary) / "copy.mp3"
+            audio.write_bytes(b"compressed-audio")
+            requests = []
+
+            def transport(request):
+                requests.append(request)
+                return HttpResponse(
+                    200,
+                    {},
+                    json.dumps(
+                        {
+                            "words": [
+                                {"text": "Ola", "start": 120, "end": 490},
+                                {"text": "mundo", "start": 510, "end": 940},
+                            ],
+                            "request_time_ms": 210,
+                        }
+                    ).encode(),
+                )
+
+            def prepare_sync_audio(_source, destination):
+                destination.write_bytes(b"wav-audio")
+                return True
+
+            detector = AssemblyAISpeechDetector(
+                "assembly-key",
+                transport=transport,
+                sync_audio_preparer=prepare_sync_audio,
+            )
+            words = detector.detect_words(audio)
+
+            self.assertEqual([(word.text, word.start, word.end) for word in words], [("Ola", 0.12, 0.49), ("mundo", 0.51, 0.94)])
+            self.assertEqual(len(requests), 1)
+            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/transcribe")
+            self.assertEqual(requests[0].headers["x-aai-model"], "universal-3-5-pro")
+            self.assertIn(b"wav-audio", requests[0].body or b"")
+
+    def test_falls_back_to_async_api_when_sync_api_rejects_audio(self) -> None:
+        with TemporaryDirectory() as temporary:
+            audio = Path(temporary) / "copy.mp3"
+            audio.write_bytes(b"compressed-audio")
+            requests = []
+            responses = iter(
+                [
+                    HttpResponse(422, {}, b'{"error":"audio_too_long"}'),
+                    HttpResponse(200, {}, b'{"upload_url":"https://cdn.example/audio"}'),
+                    HttpResponse(200, {}, b'{"id":"transcript-123","status":"queued"}'),
+                    HttpResponse(200, {}, b'{"id":"transcript-123","status":"completed","words":[{"text":"Ola","start":0,"end":300}]}'),
+                ]
+            )
+
+            def transport(request):
+                requests.append(request)
+                return next(responses)
+
+            detector = AssemblyAISpeechDetector(
+                "assembly-key",
+                transport=transport,
+                sleep=lambda _: None,
+                poll_interval=0,
+                sync_audio_preparer=lambda _source, destination: (destination.write_bytes(b"wav-audio") or True),
+            )
+            words = detector.detect_words(audio)
+
+            self.assertEqual([(word.text, word.start, word.end) for word in words], [("Ola", 0.0, 0.3)])
+            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/transcribe")
+            self.assertEqual(requests[1].url, "https://api.assemblyai.com/v2/upload")
+
     def test_uploads_audio_polls_universal_pro_and_returns_timed_words(self) -> None:
         with TemporaryDirectory() as temporary:
             audio = Path(temporary) / "copy.mp3"
@@ -40,7 +110,13 @@ class AssemblyAISpeechDetectorTests(unittest.TestCase):
                 requests.append(request)
                 return next(responses)
 
-            detector = AssemblyAISpeechDetector("assembly-key", transport=transport, sleep=lambda _: None, poll_interval=0)
+            detector = AssemblyAISpeechDetector(
+                "assembly-key",
+                transport=transport,
+                sleep=lambda _: None,
+                poll_interval=0,
+                sync_audio_preparer=lambda _source, _destination: False,
+            )
             words = detector.detect_words(audio)
 
             self.assertEqual([(word.text, word.start, word.end) for word in words], [("Ola", 0.12, 0.49), ("mundo", 0.51, 0.94)])
@@ -63,7 +139,13 @@ class AssemblyAISpeechDetectorTests(unittest.TestCase):
         with TemporaryDirectory() as temporary:
             audio = Path(temporary) / "copy.wav"
             audio.write_bytes(b"audio")
-            detector = AssemblyAISpeechDetector("assembly-key", transport=lambda _: next(responses), sleep=lambda _: None, poll_interval=0)
+            detector = AssemblyAISpeechDetector(
+                "assembly-key",
+                transport=lambda _: next(responses),
+                sleep=lambda _: None,
+                poll_interval=0,
+                sync_audio_preparer=lambda _source, _destination: False,
+            )
 
             with self.assertRaisesRegex(RuntimeError, "marcacoes por palavra"):
                 detector.detect_words(audio)
