@@ -5,6 +5,7 @@ import mimetypes
 import shutil
 import subprocess
 import time
+import wave
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -71,6 +72,8 @@ class AssemblyAISpeechDetector:
                 raise SyncTranscriptionUnavailable("Nao foi possivel preparar o audio para a Sync API.")
             if not prepared_path.is_file() or not prepared_path.stat().st_size:
                 raise SyncTranscriptionUnavailable("O audio preparado para a Sync API esta vazio.")
+            if _wav_duration_seconds(prepared_path) > SYNC_AUDIO_LIMIT_SECONDS:
+                raise SyncTranscriptionUnavailable("O audio excede o limite da Sync API.")
             response = self.transport(_sync_request(prepared_path, self.api_key))
         data = _json_body(response, "transcrever o audio rapidamente")
         if not 200 <= response.status < 300:
@@ -205,6 +208,15 @@ def _sync_request(audio_path: Path, api_key: str) -> HttpRequest:
         },
         payload,
     )
+
+
+def _wav_duration_seconds(audio_path: Path) -> float:
+    try:
+        with wave.open(str(audio_path), "rb") as wav:
+            rate = wav.getframerate()
+            return wav.getnframes() / rate if rate else float("inf")
+    except (OSError, wave.Error):
+        return float("inf")
 
 
 def _urllib_transport(request: HttpRequest) -> HttpResponse:
