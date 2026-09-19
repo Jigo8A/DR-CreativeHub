@@ -48,9 +48,11 @@ class AssemblyAISpeechDetectorTests(unittest.TestCase):
 
             self.assertEqual([(word.text, word.start, word.end) for word in words], [("Ola", 0.12, 0.49), ("mundo", 0.51, 0.94)])
             self.assertEqual(len(requests), 1)
-            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/transcribe")
+            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/v1/transcribe")
             self.assertEqual(requests[0].headers["x-aai-model"], "universal-3-5-pro")
             self.assertIn(b"RIFF", requests[0].body or b"")
+            self.assertIn(b'name="config"', requests[0].body or b"")
+            self.assertIn(b'{"timestamps": true}', requests[0].body or b"")
 
     def test_falls_back_to_async_api_when_sync_api_rejects_audio(self) -> None:
         with TemporaryDirectory() as temporary:
@@ -88,7 +90,50 @@ class AssemblyAISpeechDetectorTests(unittest.TestCase):
             words = detector.detect_words(audio)
 
             self.assertEqual([(word.text, word.start, word.end) for word in words], [("Ola", 0.0, 0.3)])
-            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/transcribe")
+            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/v1/transcribe")
+            self.assertEqual(requests[1].url, "https://api.assemblyai.com/v2/upload")
+
+    def test_falls_back_to_async_api_when_sync_omits_most_word_timestamps(self) -> None:
+        with TemporaryDirectory() as temporary:
+            audio = Path(temporary) / "copy.mp3"
+            audio.write_bytes(b"compressed-audio")
+            requests = []
+            responses = iter(
+                [
+                    HttpResponse(
+                        200,
+                        {},
+                        b'{"words":[{"text":"Ola","start":0,"end":300},{"text":"mundo"}]}'
+                    ),
+                    HttpResponse(200, {}, b'{"upload_url":"https://cdn.example/audio"}'),
+                    HttpResponse(200, {}, b'{"id":"transcript-123","status":"queued"}'),
+                    HttpResponse(200, {}, b'{"id":"transcript-123","status":"completed","words":[{"text":"Ola","start":0,"end":300},{"text":"mundo","start":310,"end":700}]}'),
+                ]
+            )
+
+            def transport(request):
+                requests.append(request)
+                return next(responses)
+
+            def prepare_sync_audio(_source, destination):
+                with wave.open(str(destination), "wb") as wav:
+                    wav.setnchannels(1)
+                    wav.setsampwidth(2)
+                    wav.setframerate(16000)
+                    wav.writeframes(b"\0\0" * 16000)
+                return True
+
+            detector = AssemblyAISpeechDetector(
+                "assembly-key",
+                transport=transport,
+                sleep=lambda _: None,
+                poll_interval=0,
+                sync_audio_preparer=prepare_sync_audio,
+            )
+            words = detector.detect_words(audio)
+
+            self.assertEqual([(word.text, word.start, word.end) for word in words], [("Ola", 0.0, 0.3), ("mundo", 0.31, 0.7)])
+            self.assertEqual(requests[0].url, "https://sync.assemblyai.com/v1/transcribe")
             self.assertEqual(requests[1].url, "https://api.assemblyai.com/v2/upload")
 
     def test_skips_sync_api_when_prepared_audio_exceeds_two_minutes(self) -> None:

@@ -18,7 +18,7 @@ from voice_provider import HttpRequest, HttpResponse, Transport
 
 
 ASSEMBLYAI_BASE_URL = "https://api.assemblyai.com/v2"
-ASSEMBLYAI_SYNC_URL = "https://sync.assemblyai.com/transcribe"
+ASSEMBLYAI_SYNC_URL = "https://sync.assemblyai.com/v1/transcribe"
 UNIVERSAL_35_PRO = "universal-3-5-pro"
 SYNC_AUDIO_LIMIT_SECONDS = 120
 
@@ -78,9 +78,12 @@ class AssemblyAISpeechDetector:
         data = _json_body(response, "transcrever o audio rapidamente")
         if not 200 <= response.status < 300:
             raise SyncTranscriptionUnavailable(_error_message(data, f"A Sync API retornou HTTP {response.status}."))
-        words = _timed_words(data.get("words"))
+        raw_words = data.get("words")
+        words = _timed_words(raw_words)
         if not words:
             raise SyncTranscriptionUnavailable("A Sync API concluiu sem marcacoes por palavra.")
+        if not isinstance(raw_words, list) or len(words) != len(raw_words):
+            raise SyncTranscriptionUnavailable("A Sync API concluiu com marcacoes por palavra incompletas.")
         return words
 
     def _upload(self, audio_path: Path) -> str:
@@ -191,6 +194,10 @@ def _sync_request(audio_path: Path, api_key: str) -> HttpRequest:
     boundary = f"----CreativeHub{uuid4().hex}"
     payload = b"".join(
         [
+            f"--{boundary}\r\n".encode(),
+            b'Content-Disposition: form-data; name="config"\r\n',
+            b"Content-Type: application/json\r\n\r\n",
+            b'{"timestamps": true}\r\n',
             f"--{boundary}\r\n".encode(),
             b'Content-Disposition: form-data; name="audio"; filename="audio.wav"\r\n',
             b"Content-Type: audio/wav\r\n\r\n",
