@@ -57,10 +57,6 @@ class AssemblyAISpeechDetector:
         path = Path(audio_path)
         if not path.is_file():
             raise RuntimeError("O audio para transcricao nao foi encontrado.")
-        try:
-            return self._detect_words_sync(path)
-        except SyncTranscriptionUnavailable:
-            pass
         upload_url = self._upload(path)
         transcript_id = self._create_transcript(upload_url)
         return self._wait_for_words(transcript_id)
